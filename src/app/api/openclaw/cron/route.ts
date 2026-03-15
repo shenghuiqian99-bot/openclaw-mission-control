@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenClawClient } from "@/lib/openclaw-client";
+import { listLocalCronJobs } from "@/lib/openclaw-local-state";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,9 +18,17 @@ export async function GET(request: NextRequest) {
     const jobs = await client.listCronJobs();
     return NextResponse.json({ jobs });
   } catch (error) {
+    const { searchParams } = new URL(request.url);
+    if (searchParams.get("runs")) {
+      return NextResponse.json(
+        { error: String(error), runs: [] },
+        { status: 500 }
+      );
+    }
+
+    const jobs = await listLocalCronJobs();
     return NextResponse.json(
-      { error: String(error), jobs: [] },
-      { status: 500 }
+      { error: String(error), jobs, fallback: true }
     );
   }
 }

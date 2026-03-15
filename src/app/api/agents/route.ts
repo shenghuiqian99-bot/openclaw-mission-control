@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenClawClient } from "@/lib/openclaw-client";
+import { listLocalAgents } from "@/lib/openclaw-local-state";
 
 // POST - Create a new agent in OpenClaw
 export async function POST(request: NextRequest) {
@@ -52,9 +53,12 @@ export async function GET() {
     const agents = await client.listAgents();
     return NextResponse.json({ agents });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to connect to OpenClaw Gateway", details: String(error) },
-      { status: 502 }
-    );
+    const agents = await listLocalAgents();
+    return NextResponse.json({
+      agents,
+      fallback: true,
+      error: "Failed to connect to OpenClaw Gateway",
+      details: String(error),
+    });
   }
 }

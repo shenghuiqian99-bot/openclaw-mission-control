@@ -25,7 +25,14 @@ export interface OpenClawSession {
 export interface OpenClawCronJob {
   id: string;
   agentId?: string;
-  schedule: string;
+  schedule:
+    | string
+    | {
+        kind?: string;
+        everyMs?: number;
+        cron?: string;
+        anchorMs?: number;
+      };
   enabled: boolean;
   lastRun?: string;
   nextRun?: string;
@@ -254,7 +261,7 @@ export class OpenClawClient {
           ? { token: this.authToken }
           : undefined,
         role: "operator",
-        scopes: ["operator.admin"],
+        scopes: ["operator.read", "operator.admin"],
         device: undefined,
       },
     };
